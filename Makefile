@@ -1,11 +1,13 @@
 usage = "==============================\n\tusage : make run file=hoge.ml\n==============================\n"
 bin:
+	git submodule foreach git pull origin master
 	make -C compiler
 	make -C assembly
 	./compiler/compile $$file
 	./assembly/assemble $$file.s 
 simulate:
 	echo $(usage)
+	git submodule foreach git pull origin master
 	make -C compiler
 	make -C assembly
 	make -C sim 
