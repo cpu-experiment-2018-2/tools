@@ -1,0 +1,9 @@
+[submodule "assembly"]
+	path = assembly
+	url = https://github.com/cpu-experiment-2018-2/assembly.git
+[submodule "compiler"]
+	path = compiler
+	url = https://github.com/cpu-experiment-2018-2/compiler.git
+[submodule "sim"]
+	path = sim
+	url = https://github.com/cpu-experiment-2018-2/sim.git
