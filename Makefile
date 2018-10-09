@@ -1,5 +1,10 @@
 usage = "==============================\n\tusage : make run file=hoge.ml\n==============================\n"
-run:
+bin:
+	make -C compiler
+	make -C assembly
+	./compiler/compile $$file
+	./assembly/assemble $$file.s 
+simulate:
 	echo $(usage)
 	make -C compiler
 	make -C assembly

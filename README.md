@@ -6,14 +6,20 @@ make init
 ```
 する.
 
-* 各submoduleをorigin masterにする
+* 各submoduleを最新のものにする(origin masterにする).
 ```
 make update
 ```
 
+* foo.mlをコンパイルしバイナリを得る
+```
+make bin file=foo.ml
+```
+foo.ml.s.ooに出力されるはず
+
 * foo.mlをコンパイルしシュミレータに流す
 ```
-make run file=foo.ml
+make simulate file=foo.ml
 ```
 
 * file.ml.sとかfile.ml.s.txtを消す
