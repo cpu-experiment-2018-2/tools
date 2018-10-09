@@ -11,7 +11,7 @@ make init
 make update
 ```
 
-* file.mlをコンパイルしシュミレータに流す
+* foo.mlをコンパイルしシュミレータに流す
 ```
 make run file=foo.ml
 ```
