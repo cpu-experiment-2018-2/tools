@@ -3,17 +3,17 @@ bin:
 	git submodule foreach git pull origin master
 	make -C compiler
 	make -C assembly
-	./compiler/compile $$file
-	./assembly/assemble $$file.s 
+	./compiler/compile $(file)
+	./assembly/assemble $(file).s
 simulate:
 	echo $(usage)
 	git submodule foreach git pull origin master
 	make -C compiler
 	make -C assembly
 	make -C sim 
-	./compiler/compile $$file
-	./assembly/assemble $$file.s -txt
-	./sim/test $$file.s.txt
+	./compiler/compile $(file)
+	./assembly/assemble $(file).s -txt
+	./sim/test $(file).s.txt
 init:
 	git submodule update --init
 update:
@@ -21,3 +21,8 @@ update:
 clean:
 	rm *.ml.s
 	rm *.ml.s.txt
+	make -C compiler clean
+	make -C assembly clean
+	make -C sim clean
+
+
