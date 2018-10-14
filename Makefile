@@ -13,7 +13,7 @@ simulate:
 	make -C sim 
 	./compiler/compile $(file)
 	./assembly/assemble $(file).s
-	./sim/test $(file).s.oo
+	./sim/sim $(file).s.oo
 init:
 	git submodule update --init
 update:
