@@ -12,8 +12,8 @@ simulate:
 	make -C assembly
 	make -C sim 
 	./compiler/compile $(file)
-	./assembly/assemble $(file).s -txt
-	./sim/test $(file).s.txt
+	./assembly/assemble $(file).s
+	./sim/test $(file).s.oo
 init:
 	git submodule update --init
 update:
