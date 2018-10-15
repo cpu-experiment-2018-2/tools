@@ -38,17 +38,20 @@ clean:
 # inprod inprod-rec inprod-loop matmul matmul-flat \
 # manyargs
 
-TESTS= print  
+TESTS= print sum-tail gcd sum fib ack even-odd
 
 test: clean build $(TESTS:%=test/%.test)
+	echo "OK"
 
 .PRECIOUS: test/% test/%.res test/%.ans 
 
 TRASH = $(TESTS:%=test/%.st) $(TESTS:%=test/%) $(TESTS:%=test/%.res) $(TESTS:%=test/%.ans) $(TESTS:%=test/%.cmp)
 
 test/%.test: test/%.ml
+	rm -f d.txt
 	./compiler/compile $^
 	./assembly/assemble $^.st
 	./sim/sim $^.st.oo
-	ocaml $^.ml > $^.res
-	diff test/d.txt test/$^.res > test/$^.ans
+	ocaml $^ > $^.res
+	./conv < d.txt > dd.txt
+	diff dd.txt $^.res 
