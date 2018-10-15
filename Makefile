@@ -31,6 +31,8 @@ clean:
 	make -C assembly clean
 	make -C sim clean
 	rm -f test/*.st test/*.oo test/*.ans test/*.res
+conv: conv.cpp
+	g++ -std=c++14 conv.cpp -o conv
 # TESTS= print sum-tail gcd sum fib ack even-odd \
 # adder funcomp cls-rec cls-bug cls-bug2 cls-reg-bug \
 # shuffle spill spill2 spill3 join-stack join-stack2 join-stack3 \
@@ -38,7 +40,7 @@ clean:
 # inprod inprod-rec inprod-loop matmul matmul-flat \
 # manyargs
 
-TESTS= print sum-tail gcd sum fib ack even-odd
+TESTS= print sum-tail gcd sum fib even-odd ack
 
 test: clean build $(TESTS:%=test/%.test)
 	echo "OK"
@@ -47,7 +49,7 @@ test: clean build $(TESTS:%=test/%.test)
 
 TRASH = $(TESTS:%=test/%.st) $(TESTS:%=test/%) $(TESTS:%=test/%.res) $(TESTS:%=test/%.ans) $(TESTS:%=test/%.cmp)
 
-test/%.test: test/%.ml
+test/%.test: test/%.ml conv
 	rm -f d.txt
 	./compiler/compile $^
 	./assembly/assemble $^.st

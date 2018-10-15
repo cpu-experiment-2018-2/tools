@@ -1,5 +1,11 @@
 # tools
 submoduleとしてシュミレーションに必要な各リポジトリが追加されている
+* テスト
+```
+make test
+```
+随時Makefileを更新する
+
 * 初期化
 ```
 make init
