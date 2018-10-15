@@ -4,7 +4,7 @@ bin:
 	make -C compiler
 	make -C assembly
 	./compiler/compile $(file)
-	./assembly/assemble $(file).s
+	./assembly/assemble $(file).st
 simulate:
 	echo $(usage)
 	git submodule foreach git pull origin master
@@ -12,17 +12,43 @@ simulate:
 	make -C assembly
 	make -C sim 
 	./compiler/compile $(file)
-	./assembly/assemble $(file).s
-	./sim/sim $(file).s.oo
+	./assembly/assemble $(file).st
+	./sim/sim $(file).st.oo
 init:
 	git submodule update --init
 update:
 	git submodule foreach git pull origin master
+build:
+	git submodule foreach git pull origin master
+	make -C compiler
+	make -C assembly
+	make -C sim 
 clean:
-	rm *.ml.s
-	rm *.ml.s.txt
+	rm *.ml.st -f
+	rm *.ml.st.txt -f
+	rm *.ml.st.oo -f
 	make -C compiler clean
 	make -C assembly clean
 	make -C sim clean
+	rm -f test/*.st test/*.oo test/*.ans test/*.res
+# TESTS= print sum-tail gcd sum fib ack even-odd \
+# adder funcomp cls-rec cls-bug cls-bug2 cls-reg-bug \
+# shuffle spill spill2 spill3 join-stack join-stack2 join-stack3 \
+# join-reg join-reg2 non-tail-if non-tail-if2 \
+# inprod inprod-rec inprod-loop matmul matmul-flat \
+# manyargs
 
+TESTS= print  
 
+test: clean build $(TESTS:%=test/%.test)
+
+.PRECIOUS: test/% test/%.res test/%.ans 
+
+TRASH = $(TESTS:%=test/%.st) $(TESTS:%=test/%) $(TESTS:%=test/%.res) $(TESTS:%=test/%.ans) $(TESTS:%=test/%.cmp)
+
+test/%.test: test/%.ml
+	./compiler/compile $^
+	./assembly/assemble $^.st
+	./sim/sim $^.st.oo
+	ocaml $^.ml > $^.res
+	diff test/d.txt test/$^.res > test/$^.ans
