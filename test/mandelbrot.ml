@@ -1,8 +1,8 @@
 let rec dbl f = f +. f in
 let rec yloop y =
-   if y >= 100.0 then () else
+   if y >= 100 then () else
    let rec xloop x y =
-     if x >= 100.0 then () else
+     if x >= 100 then () else
      let cr = dbl (float_of_int x) /. 100.0 -. 1.5 in
      let ci = dbl (float_of_int y) /. 100.0 -. 1.0 in
      let rec iloop i zr zi zr2 zi2 cr ci =

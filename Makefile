@@ -1,5 +1,7 @@
 usage = "==============================\n\tusage : make run file=hoge.ml\n==============================\n"
+export CPU_TOOLS_PATH = $(PWD)
 bin:
+	echo $(CPU_TOOLS_PATH)
 	git submodule foreach git pull origin master
 	make -C compiler
 	make -C assembly
@@ -23,6 +25,12 @@ build:
 	make -C compiler
 	make -C assembly
 	make -C sim 
+build_test:
+	git submodule foreach git pull origin master
+	make -C compiler
+	make -C assembly
+	make -C sim silent
+
 clean:
 	rm *.ml.st -f
 	rm *.ml.st.txt -f
@@ -40,16 +48,16 @@ conv: conv.cpp
 # inprod inprod-rec inprod-loop matmul matmul-flat \
 # manyargs
 
-TESTS= print sum-tail gcd sum fib even-odd ack
+TESTS= print sum-tail gcd sum fib ack
 
-test: clean build $(TESTS:%=test/%.test)
+test: clean build_test conv $(TESTS:%=test/%.test)
 	echo "OK"
 
 .PRECIOUS: test/% test/%.res test/%.ans 
 
 TRASH = $(TESTS:%=test/%.st) $(TESTS:%=test/%) $(TESTS:%=test/%.res) $(TESTS:%=test/%.ans) $(TESTS:%=test/%.cmp)
 
-test/%.test: test/%.ml conv
+test/%.test: test/%.ml 
 	rm -f d.txt
 	./compiler/compile $^
 	./assembly/assemble $^.st
