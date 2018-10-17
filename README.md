@@ -1,5 +1,6 @@
 # tools
 submoduleとしてシュミレーションに必要な各リポジトリが追加されている
+## CPU_LIB_PATHをassembly/lib/に絶対パスで指定する(アレすぎるから直したい)(Makefileから実行する分には大丈夫)
 * テスト
 ```
 make test

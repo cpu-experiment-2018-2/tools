@@ -1,7 +1,9 @@
 usage = "==============================\n\tusage : make run file=hoge.ml\n==============================\n"
-export CPU_TOOLS_PATH = $(PWD)
+export CPU_LIB_PATH=$(PWD)/assembly/lib/
+
+TRASH = $(TESTS:%=test/%.st) $(TESTS:%=test/%) $(TESTS:%=test/%.res) $(TESTS:%=test/%.ans) $(TESTS:%=test/%.cmp) 
 bin:
-	echo $(CPU_TOOLS_PATH)
+	echo $(CPU_LIB_PATH)
 	git submodule foreach git pull origin master
 	make -C compiler
 	make -C assembly
@@ -9,17 +11,18 @@ bin:
 	./assembly/assemble $(file).st
 simulate:
 	echo $(usage)
+	rm -f d.txt
 	git submodule foreach git pull origin master
 	make -C compiler
 	make -C assembly
-	make -C sim 
+	make -C sim silent
 	./compiler/compile $(file)
 	./assembly/assemble $(file).st
 	./sim/sim $(file).st.oo
 init:
 	git submodule update --init
-update:
-	git submodule foreach git pull origin master
+update: build
+
 build:
 	git submodule foreach git pull origin master
 	make -C compiler
@@ -38,9 +41,9 @@ clean:
 	make -C compiler clean
 	make -C assembly clean
 	make -C sim clean
-	rm -f test/*.st test/*.oo test/*.ans test/*.res
+	rm -f test/*.st test/*.oo test/*.ans test/*.res conv a.out
 conv: conv.cpp
-	g++ -std=c++14 conv.cpp -o conv
+	g++-5 -std=c++14 conv.cpp -o conv
 # TESTS= print sum-tail gcd sum fib ack even-odd \
 # adder funcomp cls-rec cls-bug cls-bug2 cls-reg-bug \
 # shuffle spill spill2 spill3 join-stack join-stack2 join-stack3 \
@@ -55,7 +58,6 @@ test: clean build_test conv $(TESTS:%=test/%.test)
 
 .PRECIOUS: test/% test/%.res test/%.ans 
 
-TRASH = $(TESTS:%=test/%.st) $(TESTS:%=test/%) $(TESTS:%=test/%.res) $(TESTS:%=test/%.ans) $(TESTS:%=test/%.cmp)
 
 test/%.test: test/%.ml 
 	rm -f d.txt
