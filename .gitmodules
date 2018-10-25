@@ -7,3 +7,6 @@
 [submodule "sim"]
 	path = sim
 	url = https://github.com/cpu-experiment-2018-2/sim.git
+[submodule "core"]
+	path = core
+	url = https://github.com/cpu-experiment-2018-2/core.git
