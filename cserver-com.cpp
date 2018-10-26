@@ -28,6 +28,9 @@ typedef struct {
 
 } app_settings;
 
+/* ungetc data for my_ungetc() function */
+static int ungetc_char = EOF;
+
 /* output PPM file stream */
 static FILE *ppmout = NULL;
 
@@ -35,6 +38,70 @@ static FILE *ppmout = NULL;
 #define MAX_N_WORDS 4096
 static fi_union sld_words[MAX_N_WORDS];
 static unsigned sld_n_words = 0;
+
+/* for computation time measurement */
+/*******************************************************************************
+ * COM I/O
+ ******************************************************************************/
+
+/*-----------------------------------------------------------------------------
+ * receive a character from COM port
+ * RETURN value: the next character from the COM port
+ */
+/*-----------------------------------------------------------------------------
+ *  push a character back onto the COM input stream
+ *  c : the character to be pushed back.
+ */
+static void my_ungetc(int c) { ungetc_char = c; }
+
+/*****************************************************************************
+ * PPM parser
+ ****************************************************************************/
+
+/*-----------------------------------------------------------------------------
+ * receive an integer value in text format
+ * RETURN value : -1     -> error
+ *                others -> the integer read from the USB device
+ */
+
+/*-----------------------------------------------------------------------------
+ * receive a PPM header
+ * pi : ptr to a ppm_info struct where the header information will be stored.
+ * RETURN value : true  -> success
+ *                false -> error
+ */
+
+/*-----------------------------------------------------------------------------
+ * receive a RGB pixel in text format
+ * buf[3] : an array where the RGB value is stored.
+ * RETURN value : true  -> success
+ *                false -> error
+ */
+
+/*-----------------------------------------------------------------------------
+ * receive a RGB pixel in binary format
+ * buf[3] : an array where the RGB value is stored.
+ * RETURN value : true  -> success
+ *                false -> error
+
+
+ * receive a RGB pixel
+ * buf[3] : an array where the RGB value is stored.
+ * version : PPM version; must be 3 or 6.
+ * RETURN value : true  -> success
+ *                false -> error
+ */
+
+/*****************************************************************************
+ * SLD Reader : convert the input SLD text file into a binary format
+ ****************************************************************************/
+
+/*-----------------------------------------------------------------------------
+ * read a float in the SLD file and append it to the array sld_words.
+ * fp : input SLD file stream
+ * RETURN value : the float read from the file
+ */
+void err(const char *p) { fprintf(stderr, "%s", p); }
 static float read_float(FILE *fp) {
   float f;
 
@@ -50,6 +117,12 @@ static float read_float(FILE *fp) {
 
   return (sld_words[sld_n_words++].f = f);
 }
+
+/*-----------------------------------------------------------------------------
+ * read an integer in the SLD file and append it to the array sld_words.
+ * fp : input SLD file stream
+ * RETURN value : the integer read from the file
+ */
 static int read_int(FILE *fp) {
   int i;
   if (sld_n_words >= MAX_N_WORDS) {
@@ -189,33 +262,41 @@ void write_sld_data(void) {
   int i = 0;
   for (i = 0; i < sld_n_words; i++) {
     unsigned int tmp = *(unsigned int *)(&sld_words[i]);
-    printf("%d\n", tmp & 0xff);
-    printf("%d\n", (tmp >> 8) & 0xff);
-    printf("%d\n", (tmp >> 16) & 0xff);
     printf("%d\n", (tmp >> 24) & 0xff);
+    printf("%d\n", (tmp >> 16) & 0xff);
+    printf("%d\n", (tmp >> 8) & 0xff);
+    printf("%d\n", tmp & 0xff);
   }
-}
-void write_binary(const char *out) {
-  FILE *fp;
-  fp = fopen(out, "wb");
-  int i = 0;
-  for (i = 0; i < sld_n_words; i++) {
-    unsigned int tmp = *(unsigned int *)(&sld_words[i]);
-    char t[4];
-
-    t[0] = tmp & 0xff;
-    t[1] = (tmp >> 8) & 0xff;
-    t[2] = (tmp >> 16) & 0xff;
-    t[3] = (tmp >> 24) & 0xff;
-    fwrite(t, 1, 4, fp);
-  }
-  fclose(fp);
 }
 
 int main(int argc, char *argv[]) {
 
-  load_sld_file(NULL, true);
+  app_settings as;
+  /* open the output PPM file */
+  FILE *out = fopen("res.ppm", "wb");
+  if (!out) {
+    fprintf(stderr, "cannot open PPM output file %s\n", as.ppm_filename);
+    exit(1);
+  }
+
+  /* load SLD data */
+  load_sld_file(argv[1], false);
+
+  /* wait for a 0xaa byte */
+  /* wait_for_0xaa(); */
+
+  /* send the SLD data */
+  /* send_sld_data(); */
   write_sld_data();
-  write_binary(argv[1]);
+
+  /* receive the PPM image */
+  /* recv_ppm_data(out); */
+  /*  */
+  /*  */
+  /* DWORD elapsedTime = endTime - startTime; */
+  /* fprintf(stderr, "elapsed time : %lu.%03lu s\n", */
+  /*         elapsedTime/1000, elapsedTime%1000); */
+  /* fclose(out); */
+
   return 0;
 }
