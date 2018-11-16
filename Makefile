@@ -89,7 +89,7 @@ test/%.test: test/%.ml
 	rm -f test/tmp.ml
 	./compiler/compile $^
 	./assembly/assemble $^.st
-	./sim/sim/2nd $^.st.oo
+	./sim/2nd/sim $^.st.oo
 	echo "open MiniMLRuntime" >> test/tmp.ml
 	echo "let _ = " >> test/tmp.ml
 	cat $^ >> test/tmp.ml
