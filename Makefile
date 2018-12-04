@@ -4,25 +4,25 @@ export CPU_LIB_PATH=$(PWD)/assembly/lib/
 TRASH = $(TESTS:%=test/%.st) $(TESTS:%=test/%) $(TESTS:%=test/%.res) $(TESTS:%=test/%.ans) $(TESTS:%=test/%.cmp) 
 bin:
 	echo $(CPU_LIB_PATH)
-	make -C compiler
-	make -C assembly
-	./compiler/compile $(file)
-	./assembly/assemble $(file).st
+	make -C compiler/2nd
+	make -C assembly/2nd
+	./compiler/2nd/compile $(file)
+	./assembly/2nd/assemble $(file).st
 simulate_asm:
 	rm -f d.txt
-	make -C assembly
+	make -C assembly/2nd
 	make -C sim/2nd silent
-	./assembly/assemble $(file)
+	./assembly/2nd/assemble $(file)
 	./sim/2nd/sim $(file).oo
 
 simulate:
 	echo $(usage)
 	rm -f d.txt
-	make -C compiler
-	make -C assembly
+	make -C compiler/2nd
+	make -C assembly/2nd
 	make -C sim/2nd silent
-	./compiler/compile $(file)
-	./assembly/assemble $(file).st
+	./compiler/2nd/compile $(file)
+	./assembly/2nd/assemble $(file).st
 	./sim/2nd/sim $(file).st.oo
 	./to_str <d.txt > dd.txt
 	cat dd.txt
@@ -33,22 +33,22 @@ update: build
 
 build:
 	git submodule foreach git pull origin master
-	make -C compiler
-	make -C assembly
+	make -C compiler/2nd
+	make -C assembly/2nd
 	make -C sim/2nd
 
 build_test:
 	# git submodule foreach git pull origin master
-	make -C compiler
-	make -C assembly
+	make -C compiler/2nd
+	make -C assembly/2nd
 	make -C sim/2nd silent
 
 clean:
 	rm *.ml.st -f
 	rm *.ml.st.txt -f
 	rm *.ml.st.oo -f
-	make -C compiler clean
-	make -C assembly clean
+	make -C compiler/2nd clean
+	make -C assembly/2nd clean
 	make -C sim/2nd clean
 	rm -f test/*.st test/*.oo test/*.ans test/*.res conv a.out test/*.cmo test/*.cmi test/*.correct test/*.res test/*.st.* test/*.out
 
@@ -81,14 +81,14 @@ test: clean build_test conv mini $(TESTS:%=test/%.test)
 fusei: sld
 	rm -rf d.txt
 	./sldconv < $(file) > $(file).conved
-	./sim/2nd/sim ./compiler/minrt/minrt_with_global_fusei.ml.st.oo  < $(file).conved
+	./sim/2nd/sim ./compiler/2nd/minrt/minrt_with_global_fusei.ml.st.oo  < $(file).conved
 	./to_str < d.txt > res.ppm
 	
 test/%.test: test/%.ml 
 	rm -f d.txt
 	rm -f test/tmp.ml
-	./compiler/compile $^
-	./assembly/assemble $^.st
+	./compiler/2nd/compile $^
+	./assembly/2nd/assemble $^.st
 	./sim/2nd/sim $^.st.oo
 	echo "open MiniMLRuntime" >> test/tmp.ml
 	echo "let _ = " >> test/tmp.ml
