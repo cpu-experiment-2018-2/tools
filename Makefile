@@ -1,5 +1,5 @@
 usage = "==============================\n\tusage : make run file=hoge.ml\n==============================\n"
-export CPU_LIB_PATH=$(PWD)/assembly/lib/
+export CPU_LIB_PATH=$(PWD)/assembly/2nd/lib/
 
 TRASH = $(TESTS:%=test/%.st) $(TESTS:%=test/%) $(TESTS:%=test/%.res) $(TESTS:%=test/%.ans) $(TESTS:%=test/%.cmp) 
 bin:
@@ -26,6 +26,30 @@ simulate:
 	./sim/2nd/sim $(file).st.oo
 	./to_str <d.txt > dd.txt
 	cat dd.txt
+llvm:
+	~/2nd/2nd/compile $(file) -llvm-ir
+	llvm-link ./llvmlibs/io.ll ./llvmlibs/lib.ll $(file).ll -o $(file).linked.ll -S
+	opt $(file).linked.ll -O3 -S -o $(file).linked.ll
+	llvm-link ./llvmlibs/notopt.ll $(file).linked.ll -o $(file).linked.ll -S
+	opt $(file).linked.ll -inline -S -o $(file).linked.ll
+	cpuex $(file).linked.ll -O3 -march=ELMO
+	./assembly/2nd/assemble $(file).linked.s
+
+from-llvm-ir:
+	llvm-link ./llvmlibs/io.ll ./llvmlibs/lib.ll $(file).ll -o $(file).linked.ll -S
+	opt $(file).linked.ll -O3 -S -o $(file).linked.ll
+	llvm-link ./llvmlibs/notopt.ll $(file).linked.ll -o $(file).linked.ll -S
+	opt $(file).linked.ll -inline -S -o $(file).linked.ll
+	cpuex $(file).linked.ll -O3 -march=ELMO 
+	./assembly/2nd/assemble $(file).linked.s
+
+
+gen:
+	./compiler/2nd/compile $(file) -llvm-ir
+	llvm-link ./compiler/2nd/lib/lib.ll $(file).ll -o $(file).ll -S
+	opt $(file).ll -O3 -S -o $(file).ll
+	cpuex $(file).ll -O3 -march=ELMO
+
 
 init:
 	git submodule update --init
@@ -41,7 +65,7 @@ build_test:
 	# git submodule foreach git pull origin master
 	make -C compiler/2nd
 	make -C assembly/2nd
-	make -C sim/2nd silent
+	make -C sim/2nd 
 
 clean:
 	rm *.ml.st -f
@@ -61,8 +85,8 @@ conv: conv.cpp
 # inprod inprod-rec inprod-loop matmul matmul-flat \
 # manyargs
 
-TESTS= sum-tail gcd sum fib adder cls-rec cls-bug cls-reg-bug spill spill2 spill3 even-odd  shuffle spill spill2 spill3 join-stack join-stack2 join-stack3 join-reg join-reg2 inprod inprod-rec inprod-loop matmul matmul-flat manyargs iszero fisneg fispos cond fless ftoi floor
-
+# TESTS= sum-tail gcd sum fib adder cls-rec cls-bug cls-reg-bug spill spill2 spill3 even-odd  shuffle spill spill2 spill3 join-stack join-stack2 join-stack3 join-reg join-reg2 inprod inprod-rec inprod-loop matmul matmul-flat manyargs iszero fisneg fispos cond fless ftoi floor
+TESTS= gcd sum fib spill spill3 shuffle spill spill3 join-stack join-stack2 join-stack3 join-reg join-reg2 inprod-rec inprod-loop manyargs  sum-tail
 
 # TESTS= float
 
@@ -87,9 +111,20 @@ fusei: sld
 test/%.test: test/%.ml 
 	rm -f d.txt
 	rm -f test/tmp.ml
-	./compiler/2nd/compile $^
-	./assembly/2nd/assemble $^.st
-	./sim/2nd/sim $^.st.oo
+	~/2nd/2nd/compile $^ -llvm-ir
+	llvm-link ./llvmlibs/io.ll ./llvmlibs/lib.ll $^.ll -o $^.linked.ll -S
+	opt $^.linked.ll -O3 -S -o $^.linked.ll
+	llvm-link ./llvmlibs/notopt.ll $^.linked.ll -o $^.linked.ll -S
+	opt $^.linked.ll -inline -S -o $^.linked.ll
+	cpuex $^.linked.ll -O3 -march=ELMO -o hoge.s
+	./assembly/2nd/assemble hoge.s
+	# ./assembly/2nd/assemble $^.s
+	# opt $^.ll -O3 -S -o $^.ll -loop-unroll-and-jam
+	# llvm-link ~/2nd/2nd/lib/lib.ll $^.ll -o $^.ll -S
+	# llvm-link ./assembly/2nd/lib/io.ll $^.ll -o $^.ll -S
+	# cpuex $^.ll -O3 -march=ELMO -o hoge.s
+	# ./assembly/2nd/assemble hoge.s
+	./sim/2nd/sim hoge.s.oo
 	echo "open MiniMLRuntime" >> test/tmp.ml
 	echo "let _ = " >> test/tmp.ml
 	cat $^ >> test/tmp.ml
