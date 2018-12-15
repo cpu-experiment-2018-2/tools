@@ -11,19 +11,19 @@ bin:
 simulate_asm:
 	rm -f d.txt
 	make -C assembly/2nd
-	make -C sim/2nd silent
+	make -C sim/2nd64 silent
 	./assembly/2nd/assemble $(file)
-	./sim/2nd/sim $(file).oo
+	./sim/2nd64/sim $(file).oo
 
 simulate:
 	echo $(usage)
 	rm -f d.txt
 	make -C compiler/2nd
 	make -C assembly/2nd
-	make -C sim/2nd silent
+	make -C sim/2nd64 silent
 	./compiler/2nd/compile $(file)
 	./assembly/2nd/assemble $(file).st
-	./sim/2nd/sim $(file).st.oo
+	./sim/2nd64/sim $(file).st.oo
 	./to_str <d.txt > dd.txt
 	cat dd.txt
 
@@ -35,13 +35,13 @@ build:
 	git submodule foreach git pull origin master
 	make -C compiler/2nd
 	make -C assembly/2nd
-	make -C sim/2nd
+	make -C sim/2nd64
 
 build_test:
 	# git submodule foreach git pull origin master
 	make -C compiler/2nd
 	make -C assembly/2nd
-	make -C sim/2nd silent
+	make -C sim/2nd64 silent
 
 clean:
 	rm *.ml.st -f
@@ -49,7 +49,7 @@ clean:
 	rm *.ml.st.oo -f
 	make -C compiler/2nd clean
 	make -C assembly/2nd clean
-	make -C sim/2nd clean
+	make -C sim/2nd64 clean
 	rm -f test/*.st test/*.oo test/*.ans test/*.res conv a.out test/*.cmo test/*.cmi test/*.correct test/*.res test/*.st.* test/*.out
 
 conv: conv.cpp
@@ -81,7 +81,7 @@ test: clean build_test conv mini $(TESTS:%=test/%.test)
 fusei: sld
 	rm -rf d.txt
 	./sldconv < $(file) > $(file).conved
-	./sim/2nd/sim ./compiler/2nd/minrt/minrt_with_global_fusei.ml.st.oo  < $(file).conved
+	./sim/2nd64/sim ./compiler/2nd/minrt/minrt_with_global_fusei.ml.st.oo  < $(file).conved
 	./to_str < d.txt > res.ppm
 	
 test/%.test: test/%.ml 
@@ -89,7 +89,7 @@ test/%.test: test/%.ml
 	rm -f test/tmp.ml
 	./compiler/2nd/compile $^
 	./assembly/2nd/assemble $^.st
-	./sim/2nd/sim $^.st.oo
+	./sim/2nd64/sim $^.st.oo
 	echo "open MiniMLRuntime" >> test/tmp.ml
 	echo "let _ = " >> test/tmp.ml
 	cat $^ >> test/tmp.ml
